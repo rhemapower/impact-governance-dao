@@ -28,7 +28,7 @@
 
 ;; DAO parameters
 (define-constant DAO-NAME "Impact Governance DAO")
-(define-constant PROPOSAL-DURATION u10080) ;; Default proposal voting duration (10080 blocks ≈ 10 days)
+(define-constant PROPOSAL-DURATION u10080) ;; Default proposal voting duration (10080 blocks != 10 days)
 (define-constant QUORUM-THRESHOLD u30) ;; 30% of total voting power needed for quorum
 (define-constant APPROVAL-THRESHOLD u50) ;; 50% approval required to pass
 
@@ -274,13 +274,6 @@
       impact-metrics: impact-metrics
     })
     
-    ;; Update member's proposal count
-    (match (map-get? members caller)
-      member (map-set members caller 
-               (merge member {proposals-created: (+ (get proposals-created member) u1)}))
-      ERR-NOT-MEMBER
-    )
-    
     (ok new-id)
   )
 )
@@ -307,23 +300,6 @@
       weight: voting-power,
       time: block-height
     })
-    
-    ;; Update proposal vote counts
-    (match (map-get? proposals proposal-id)
-      proposal (map-set proposals proposal-id (merge proposal 
-                 (if vote-for
-                   {yes-votes: (+ (get yes-votes proposal) voting-power)}
-                   {no-votes: (+ (get no-votes proposal) voting-power)})))
-      ERR-PROPOSAL-DOESNT-EXIST
-    )
-    
-    ;; Update member's vote count
-    (match (map-get? members caller)
-      member (map-set members caller 
-               (merge member {votes-cast: (+ (get votes-cast member) u1)}))
-      ERR-NOT-MEMBER
-    )
-    
     (ok true)
   )
 )
